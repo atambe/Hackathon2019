@@ -1,0 +1,234 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="D:\hackathon-web\style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+		<script src="https://code.highcharts.com/highcharts.js"></script>
+		<script src="https://code.highcharts.com/modules/exporting.js"></script>
+		<script src="https://code.highcharts.com/modules/export-data.js"></script>
+	</head>
+
+	<body class="carbon-bg">
+		<div class="col-lg-6">			
+			<div class="back-backdrop index-form">
+			<fieldset>
+				<form id="carbon-tracker" class="col-lg-12 form-group">
+					<fieldset>
+						<legend class="theme-header">Monthly Carbon Footprint Tracker</legend>
+						<div class="form-group">
+						  <label for="e-appliances">Date :</label>
+						  <input type="date" class="form-control" id="date" value="" o required>
+						</div>
+
+						<div class="form-group">
+						  <label for="e-appliances">Electronic Appliances:</label>
+						  <input type="text" class="form-control" id="e-appliances" placeholder="in Lakhs" required>
+						</div>
+						<div class="form-group">
+						  <label for="transport">Transport:</label>
+						  <input type="text" class="form-control" id="transport" placeholder="in Lakhs" required>
+						</div>
+						<div class="form-group">
+						  <label for="e-waste">Electronic Waste:</label>
+						  <input type="text" class="form-control" id="e-waste" placeholder="in Lakhs" required>
+						</div>
+						<div class="form-group">
+						  <label for="stationary">Stationary:</label>
+						  <input type="text" class="form-control" id="stationary" placeholder="in Lakhs" required>
+						</div>
+						<div class="form-group">
+						  <label for="waste">Waste:</label>
+						  <input type="text" class="form-control" id="waste" placeholder="in Lakhs" required>
+						</div>
+						<div class="form-group">
+						  <label for="food">Food:</label>
+						  <input type="text" class="form-control" id="food" placeholder="in Lakhs" required>
+						</div>
+						<div class="form-group">
+						  <input type="button" class="btn btn-success" value="CarbonFootprint+" onclick="calc()" id="submit">
+						  <input type="reset" class="btn btn-danger" value="Reset" id="reset">
+						</div>
+					</fieldset>
+				</form>
+			</fieldset>
+		</div>
+	</div>
+		<div class="col-lg-6">
+			<div class="back-backdrop dashboard-form">
+				<legend class="theme-header">Carbon Footprint</legend>
+				<div id="histogram-container" style="margin-right: 20px;margin-left: 10px;"></div>
+			</div>
+		</div>
+	</body>
+
+	<style>
+		.dashboard-form {
+			margin-left: 15px;
+			margin-top: 50px;
+			padding-top: 50px;
+			width: 600px;
+			color: white !important;
+			border-radius: 15px;
+			padding-left: 10px;
+			padding-bottom: 30px;
+		}
+
+		.theme-header {
+			color: white;
+			font: 2.5em;
+		}
+		.index-form {
+			margin-left: 15px;
+			margin-top: 50px;
+			padding-top: 50px;
+			width: 600px;
+			color: white !important;
+			border-radius: 15px;
+			padding-left: 10px;
+			padding-bottom: 30px;
+		}
+		.back-backdrop {
+			background-color: black;
+			opacity: 0.8;
+		}
+		.carbon-bg {
+			background-image: url('bg.jpg');
+		}
+		/* Navbar CSS */
+		body {
+		  font-family: "Lato", sans-serif;
+		}
+
+		.sidenav {
+		  height: 100%;
+		  width: 160px;
+		  position: fixed;
+		  z-index: 1;
+		  top: 0;
+		  left: 0;
+		  background-color: #111;
+		  overflow-x: hidden;
+		  padding-top: 20px;
+		}
+
+		.sidenav a {
+		  padding: 6px 8px 6px 16px;
+		  text-decoration: none;
+		  font-size: 25px;
+		  color: #818181;
+		  display: block;
+		}
+
+		.sidenav a:hover {
+		  color: #f1f1f1;
+		}
+
+		.main {
+		  margin-left: 160px; /* Same as the width of the sidenav */
+		  font-size: 28px; /* Increased text to enable scrolling */
+		  padding: 0px 10px;
+		}
+
+		@media screen and (max-height: 450px) {
+		  .sidenav {padding-top: 15px;}
+		  .sidenav a {font-size: 18px;}
+		}
+	</style>
+
+	<script type="text/javascript">
+
+		$(document).ready(function () {
+			today();			
+		});
+		var indexes = {
+			"ea" : 1.5,
+			"tansport" : 3,
+			"ew" : 2.8,
+			"stationary" : 2.1,
+			"waste" : 1.95,
+			"food" : 1.6
+		};
+
+		function today() {
+			document.getElementById("date").valueAsDate = new Date();
+		}
+
+		function calc() {
+
+			var ea = parseInt(document.getElementById("e-appliances").value);
+			var transport = parseInt(document.getElementById("transport").value);
+			var ew = parseInt(document.getElementById("e-waste").value);
+			var stationary = parseInt(document.getElementById("stationary").value);
+			var waste = parseInt(document.getElementById("waste").value);
+			var food = parseInt(document.getElementById("food").value);
+			var date = document.getElementById("date").value;
+			
+			var monthArray = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+			var month = monthArray[parseInt(date.split("-")[1]) - 1];
+
+			var calculatedIndex = ea * indexes.ea + transport * indexes.tansport + ew * indexes.ew + stationary * indexes.stationary + waste * indexes.waste + food * indexes.food;
+
+			chart.xAxis.categories.push(month);
+			chart.series[0].data.push(calculatedIndex);
+
+			Highcharts.chart('histogram-container', chart);
+		}
+
+		var chart = {
+		  chart: {
+		    type: 'column'
+		  },
+		  title: {
+		    text: 'Monthly Carbon Footprint'
+		  },
+		  subtitle: {
+		    text: ''
+		  },
+		  xAxis: {
+		    categories: [
+		      'Jan',
+		      'Feb',
+		      'Mar',
+		      'Apr',
+		      'May',
+		      'Jun',
+		      'Jul'
+		    ],
+		    crosshair: true
+		  },
+		  yAxis: {
+		    min: 0,
+		    title: {
+		      text: ''
+		    }
+		  },
+		  tooltip: {
+		    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+		    pointFormat: '<tr><td style="color:{series.color};padding:0">CFI: </td>' +
+		      '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+		    footerFormat: '</table>',
+		    shared: true,
+		    useHTML: true
+		  },
+		  plotOptions: {
+		    column: {
+		      pointPadding: 0,
+		      borderWidth: 0,
+		      groupPadding: 0.1,
+		      shadow: false
+		    }
+		  },
+		  series: [{
+		    name: 'Carbon Footprint Index',
+		    data: [44.15, 47.56, 57.8, 60.75, 58.12, 53.68, 48.12]
+		  }]
+		};
+		Highcharts.chart('histogram-container', chart);
+	
+	</script>
+</html>
